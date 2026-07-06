@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<!--
+  AI名片海报 · 参数化模板(750×1250,与 ddd.baiyihuodong.com/chen 原版逐像素同构)
+  占位符: __PHOTO__(方形头像,base64或URL) __QR__(二维码,务必用qrcode库生成)
+          __NAME__ __SUBTITLE__ __ROLE__ __SLOGAN_L1__ __SLOGAN_L2__
+          __STAT1_N__/__STAT1_L__ ... __STAT3_N__/__STAT3_L__ __WECHAT__ __CTA_TEXT__
+  渲染: 用 build_poster.py 一键出图;或无头Chrome --window-size=750,1250 截图
+  设计规格(勿改,改了就和原版不一致):
+    金渐变 linear-gradient(120deg,#d9a13a,#ffb800 55%,#ffd966) · 底色 #050810
+    头像环 conic-gradient(from 210deg,#ffb800,#00f0ff 40%,rgba(255,255,255,.15) 70%,#ffb800)
+    数据三色 #00f0ff/#ffb800/#b066ff · 圆角 stat 22px/contact 26px · 徽标含内描边+顶部高光
+-->
+<html lang="zh-CN"><head><meta charset="UTF-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:750px;height:1250px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','HarmonyOS Sans SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif; /* ⚠️CJK字体栈勿删:回退到等宽/像素体=走样 */
+  background:radial-gradient(90% 46% at 85% -6%,rgba(176,102,255,.22),transparent 60%),
+             radial-gradient(75% 40% at -8% 22%,rgba(0,240,255,.16),transparent 60%),
+             radial-gradient(100% 60% at 50% 115%,rgba(255,184,0,.14),transparent 62%),#050810;
+  color:#f0f4ff;overflow:hidden;position:relative}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:50px 50px;-webkit-mask-image:radial-gradient(80% 60% at 50% 30%,#000 30%,transparent 100%)}
+.wrap{position:relative;padding:64px 56px 0;text-align:center}
+.avatar-ring{width:248px;height:248px;margin:0 auto;border-radius:50%;padding:6px;
+  background:conic-gradient(from 210deg,#ffb800,#00f0ff 40%,rgba(255,255,255,.15) 70%,#ffb800)}
+.avatar{width:236px;height:236px;border-radius:50%;object-fit:cover;border:5px solid #0a0f1c;display:block}
+h1{font-size:64px;font-weight:900;letter-spacing:.04em;margin-top:34px}
+.alias{font-size:27px;color:rgba(220,228,245,.75);margin-top:10px;letter-spacing:.06em}
+.role{display:inline-block;margin-top:22px;font-size:31px;font-weight:800;padding:12px 38px;border-radius:ari 999px;border-radius:999px;
+  background:linear-gradient(120deg,#d9a13a,#ffb800 55%,#ffd966);color:#1a1204}
+.slogan{margin-top:30px;font-size:30px;line-height:1.55;color:rgba(220,228,245,.9)}
+.slogan b{color:#ffb800}
+.stats{display:flex;justify-content:center;gap:14px;margin-top:38px}
+.stat{flex:1;max-width:200px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:24px 8px}
+.stat .n{font-size:40px;font-weight:900;color:#00f0ff}
+.stat:nth-child(2) .n{color:#ffb800}
+.stat:nth-child(3) .n{color:#b066ff}
+.stat .l{font-size:22px;color:rgba(220,228,245,.7);margin-top:6px}
+.contact{margin:36px 12px 0;background:linear-gradient(135deg,rgba(255,184,0,.14),rgba(255,255,255,.04));
+  border:1.5px solid rgba(255,184,0,.45);border-radius:26px;padding:30px 20px}
+.contact{display:flex;align-items:center;gap:26px;text-align:left}
+.qrwrap{flex:0 0 160px}
+.qrwrap img{width:160px;height:160px;border-radius:14px;display:block;background:#fff;padding:8px;box-sizing:border-box}
+.qrwrap .scan{font-size:18px;color:#ffd966;margin-top:10px;text-align:center;line-height:1.4}
+.cmeta{flex:1;min-width:0;text-align:center}
+.contact .k{font-size:24px;color:rgba(220,228,245,.75)}
+.contact .v{font-size:36px;font-weight:900;letter-spacing:.04em;color:#ffb800;margin-top:8px}
+.hint-btn{display:block;width:max-content;margin:14px auto 0;position:relative;font-size:20px;font-weight:900;color:#1a1204;
+  padding:9px 24px;border-radius:999px;letter-spacing:.08em;white-space:nowrap;
+  background:linear-gradient(120deg,#d9a13a,#ffb800 55%,#ffd966);
+  box-shadow:0 8px 22px rgba(255,184,0,.4),inset 0 0 0 2px rgba(255,232,160,.55)}
+.hint-btn::after{content:"";position:absolute;left:10px;right:10px;top:4px;height:42%;border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,255,255,.5),transparent);pointer-events:none}
+.url{margin-top:26px;font-size:24px;color:#00f0ff;letter-spacing:.03em}
+.foot{position:absolute;left:0;right:0;bottom:24px;text-align:center;font-size:24px;color:rgba(190,200,225,.55);letter-spacing:.35em}
+.corner-badge{position:absolute;top:38px;left:42px;z-index:2;font-size:21px;font-weight:900;color:#1a1204;
+  padding:8px 20px;border-radius:999px 999px 999px 8px;letter-spacing:.1em;
+  background:linear-gradient(120deg,#d9a13a,#ffb800 55%,#ffd966);
+  box-shadow:0 10px 30px rgba(255,184,0,.45),inset 0 0 0 2px rgba(255,232,160,.55)}
+.corner-badge::after{content:"";position:absolute;left:10px;right:10px;top:6px;height:40%;border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,255,255,.5),transparent);pointer-events:none}
+</style></head><body>
+<div class="grid"></div>
+<div class="corner-badge">✦ AI名片</div>
+<div class="wrap">
+  <div class="avatar-ring"><img class="avatar" src="__PHOTO__" alt=""></div>
+  <h1>__NAME__</h1>
+  <div class="alias">__SUBTITLE__</div>
+  <div class="role">__ROLE__</div>
+  <p class="slogan">__SLOGAN_L1__<br><b>__SLOGAN_L2__</b></p>
+  <div class="stats">
+    <div class="stat"><div class="n">__STAT1_N__</div><div class="l">__STAT1_L__</div></div>
+    <div class="stat"><div class="n">__STAT2_N__</div><div class="l">__STAT2_L__</div></div>
+    <div class="stat"><div class="n">__STAT3_N__</div><div class="l">__STAT3_L__</div></div>
+  </div>
+  <div class="contact">
+    <div class="qrwrap">
+      <img src="__QR__" alt="">
+      <div class="scan">扫码查看我的<br>AI名片详情</div>
+    </div>
+    <div class="cmeta">
+      <div class="k">加微信 · 备注「AI名片」优先通过</div>
+      <div class="v">__WECHAT__</div>
+      <div class="hint-btn">✦ __CTA_TEXT__</div>
+    </div>
+  </div>
+</div>
+
+</body></html>

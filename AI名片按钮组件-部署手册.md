@@ -181,5 +181,18 @@ qr.make(fit=True)
 qr.make_image(fill_color="#0a0f1c", back_color="white").save('qr.png')
 ```
 
+## 六、海报本体也要复刻?用参数化模板,别照截图重画
+
+⚠️ **海报不在网页代码里**——它是一张预渲染的 JPG。只复制按钮组件代码拿不到海报;让 AI 照截图"重画"必然走样(字体回退成等宽体、徽标变方块、金渐变丢失)。正确做法:
+
+1. 取仓库里两个文件:[`poster-template.html`](poster-template.html)(参数化模板,设计规格已锁死并注释) + [`build_poster.py`](build_poster.py)(一键构建)
+2. 改 `build_poster.py` 顶部 CONFIG:照片路径 / 二维码链接 / 姓名 / 头衔 / 三个数据 / 微信号 / CTA 文案
+3. `pip install qrcode pillow` 后运行 `python3 build_poster.py` → 得 `poster.jpg`(750×1250,与原版逐像素同构)
+
+**三条铁律**:
+- 模板里的设计规格(金渐变色值/头像彩环/三色数据/圆角)**不要改**,改了就和原版不一致
+- CJK 字体栈不要删(Linux 服务器渲染需先装 Noto Sans CJK,否则中文变豆腐块/等宽体)
+- 二维码由脚本用 qrcode 库生成,**严禁手绘/AI画码**(必是假码)
+
 ---
 *线上参考:https://ddd.baiyihuodong.com/chen(点「保存AI名片图片」「分享AI名片链接」体验实际交互)*
