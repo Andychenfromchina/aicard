@@ -410,6 +410,16 @@ footer a{color:var(--txt-mid);text-decoration:none}
   display:flex;flex-direction:column;align-items:center;justify-content:center}
 .poster-mask[hidden],.wxguide[hidden]{display:none}
 .poster-box img{max-width:82vw;max-height:72vh;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.7);display:block;-webkit-touch-callout:default}
+.poster-box img[hidden]{display:none}  /* 作者CSS的display:block会盖掉hidden属性,必须显式关掉,否则裂图残留 */
+.poster-fail{max-width:82vw;padding:26px 22px;border-radius:18px;text-align:center;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,184,0,.4)}
+.poster-fail[hidden]{display:none}
+.pf-icon{font-size:2.2rem;line-height:1}
+.pf-title{font-size:1.05rem;font-weight:800;color:#ffd966;margin-top:10px}
+.pf-desc{font-size:.84rem;color:rgba(220,228,245,.8);margin-top:10px;line-height:1.7}
+.pf-desc code{display:inline-block;margin-top:6px;padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.45);
+  color:#00f0ff;font-size:.74rem;word-break:break-all}
+.pf-hint{font-size:.76rem;color:rgba(190,200,225,.68);margin-top:12px;line-height:1.6}
 .poster-tip{text-align:center;font-size:var(--fs-sm);color:#ffd966;margin-top:14px;letter-spacing:.08em}
 .poster-close{position:absolute;top:calc(16px + env(safe-area-inset-top));right:16px;width:44px;height:44px;border-radius:50%;
   border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-size:1.05rem;cursor:pointer}
@@ -711,8 +721,14 @@ footer a{color:var(--txt-mid);text-decoration:none}
 <div class="poster-mask" id="posterMask" hidden role="dialog" aria-modal="true" aria-label="AI名片海报,长按图片保存">
   <button class="poster-close" id="posterClose" type="button" aria-label="关闭">✕</button>
   <div class="poster-box">
-    <img src="xuxinfeng-poster.jpg?v=5" alt="许新风AI名片海报">
-    <div class="poster-tip">长按图片 · 保存到手机相册</div>
+    <img id="posterImg" src="xuxinfeng-poster.jpg?v=5" alt="许新风AI名片海报">
+    <div class="poster-fail" id="posterFail" hidden>
+      <div class="pf-icon" aria-hidden="true">🖼</div>
+      <p class="pf-title">海报还没生成</p>
+      <p class="pf-desc">这张卡的海报图还没上传到:<br><code id="posterFailUrl"></code></p>
+      <p class="pf-hint">用仓库里的 build_poster.py 生成 750×1250 海报,上传到上面这个地址即可;<br>或把本页海报 img 的 src 改成你自己的图片地址。</p>
+    </div>
+    <div class="poster-tip" id="posterTip">长按图片 · 保存到手机相册</div>
   </div>
 </div>
 <div class="wxguide" id="wxGuide" hidden>
@@ -1018,6 +1034,17 @@ bindTap($('#navCta'), () => copy(WX, '微信号13676281949已经复制,备注「
 /* ---------- 名片海报弹层 & 链接分享 ---------- */
 const posterMask = $('#posterMask'), wxGuide = $('#wxGuide');
 bindTap($('#posterBtn'), () => { posterMask.hidden = false; });
+// 海报图加载失败(常见于复刻新卡时海报还没生成/上传):不裂图,给出可执行的提示
+const posterImg = $('#posterImg'), posterFail = $('#posterFail'), posterTip = $('#posterTip');
+if (posterImg) posterImg.addEventListener('error', () => {
+  posterImg.hidden = true;
+  if (posterTip) posterTip.hidden = true;
+  if (posterFail) {
+    const u = $('#posterFailUrl');
+    if (u) u.textContent = posterImg.getAttribute('src') || '(未设置)';
+    posterFail.hidden = false;
+  }
+});
 $('#posterClose').addEventListener('click', () => { posterMask.hidden = true; });
 posterMask.addEventListener('click', (e) => { if (e.target === posterMask) posterMask.hidden = true; });
 wxGuide.addEventListener('click', () => { wxGuide.hidden = true; });

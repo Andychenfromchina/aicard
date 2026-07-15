@@ -10,7 +10,7 @@
 
 ## ① 填你的信息（我来填，其余你别动）
 - 姓名：`{{姓名}}`（示例：张三）
-- 职位：`{{职位}}`（示例：合伙人）
+- 职位：`{{职位}}`（示例：首席AI导师）
 - 个人标签：`{{标签}}`（示例：AI全域获客导师）
 - 微信号：`{{微信号}}`
 - 头像照片：`{{照片路径}}`（一张清晰正脸照，建议 ≥560×560；越正越好，会被裁成正方形）
@@ -31,15 +31,15 @@ pip install qrcode pillow    # 海报生成依赖
 |---|---|
 | `许新风`（所有出现处：`<h1>`、logo `<span>`、`alt`、`text: 'AI名片 · 许新风'`） | `{{姓名}}` |
 | logo 圆标首字 `<span class="mark">许</span>` | `{{姓名}}` 的第一个字 |
-| `<p class="alias">百商智校 合伙人</p>` | `百商智校 {{职位}}` |
+| `<p class="alias">百商智校 首席AI导师</p>` | `百商智校 {{职位}}` |
 | `<div class="role-pill">AI全域获客导师</div>` | `{{标签}}` |
-| `<title>许新风·百商智校合伙人 \| AI全域获客导师</title>` 和 `og:title` 同款 | `{{姓名}}·百商智校{{职位}} \| {{标签}}` |
+| `<title>许新风·百商智校首席AI导师 \| AI全域获客导师</title>` 和 `og:title` 同款 | `{{姓名}}·百商智校{{职位}} \| {{标签}}` |
 | `13676281949`（`<div class="v">`、`aria-label`、`const WX`、两处 toast 提示） | `{{微信号}}` |
 | `const SHARE_URL = 'https://ddd.baiyihuodong.com/aic/xuxinfeng'` | `const SHARE_URL = '{{网址}}'` |
 | `og:url` / `canonical` 的地址 | `{{网址}}` |
 | `og:image` / `itemprop=image` 的地址 | 换成缩略图的**完整网址**（`{{网址}}` 同目录下的 `{{slug}}-share.jpg` 绝对地址，微信抓图更稳） |
 | body 里那个 `left:-9999px` 隐藏 `<img>` 的 `src`（`xuxinfeng-share.jpg`） | 改成相对文件名 `{{slug}}-share.jpg` |
-| 海报弹层 `<img src="xuxinfeng-poster.jpg?v=2">` | `{{slug}}-poster.jpg?v=1` |
+| 海报弹层 `<img id="posterImg" src="xuxinfeng-poster.jpg?v=5">` | `{{slug}}-poster.jpg?v=1` |
 | `<meta name="description">`（已是 slogan「AI名片，让所有AI大模型认识你！」） | **保持不动**（这是通用文案） |
 
 替换头像（网页里的圆形头像是 base64 内嵌，需重新生成）：把基板 `<img class="avatar" src="data:image/jpeg;base64,……">` 的 src，换成我照片的 320×320 base64。生成方法：
@@ -62,7 +62,7 @@ CONFIG = {
     "NAME": "{{姓名}}",
     "SUBTITLE": "{{标签}}",
     "ROLE": "百商智校 · {{职位}}",
-    "SLOGAN_L1": "30天帮你的企业把",
+    "SLOGAN_L1": "30天给你一个会干活的AI员工",
     "SLOGAN_L2": "AI获客成本降低50%",
     "STAT1_N": "1,000+", "STAT1_L": "上线智能体",
     "STAT2_N": "3,000+", "STAT2_L": "服务企业",
@@ -91,6 +91,8 @@ im.crop(((w-s)//2,(h-s)//2,(w+s)//2,(h+s)//2)).resize((512,512), Image.LANCZOS).
 - `{{slug}}-share.jpg`
 
 ## ⚠️ 铁律（违反必翻车，逐条自检）
+0. **海报必须先生成、再让网页能取到**——第③步网页里海报弹层的 `<img src>` 指向 `{{网址}}` 同目录的 `{{slug}}-poster.jpg`。**这张图不会凭空存在**：必须跑完第④步生成它，并和网页一起上传到同一目录。没上传就点「保存AI名片图片」，弹层会提示"海报还没生成"并回显缺失地址（新版已内置兜底，不会再裂图）。
+   - 还没有服务器/只想本地看？把海报转 base64 直接内嵌：`<img id="posterImg" src="data:image/jpeg;base64,……">`，即可离线可用。
 1. **二维码必须用 qrcode 库生成**（第④步脚本已做）；任何手绘/AI 画的二维码都是扫不出的假码。
 2. **海报别照截图让 AI「重画」**——必须走 `build_poster.py`，否则中文字体回退成等宽体、金徽标变方块、金渐变丢失。
 3. **海报设计规格别改**：金渐变 `#d9a13a→#ffb800→#ffd966`、头像彩环、三色数据、圆角——`poster-template.html` 里锁死了，只改 CONFIG 文案。
